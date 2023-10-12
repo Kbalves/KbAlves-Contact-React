@@ -1,45 +1,60 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	return {
-		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
-		},
-		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
+  const baseUrl = "https://playground.4geeks.com/apis/fake/contact/";
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
-
-				//reset the global store
-				setStore({ demo: demo });
-			}
-		}
-	};
+  return {
+    store: {
+      contact: [],
+      upDateContactInfo: [],
+      upOrDelete: [], // Initialize agendaData in the store
+    },
+    actions: {
+      newContact: (name, email, address, phone) => {
+        fetch(baseUrl, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            full_name: name,
+            email: email,
+            agenda_slug: "Kbalves-agenda",
+            address: address,
+            phone: phone,
+          }),
+        });
+      },
+      getContacts: () => {
+        fetch(baseUrl + "agenda/Kbalves-agenda")
+          .then((received) => received.json())
+          .then((data) => setStore({ contact: data }))
+          .catch((error) => {
+            console.error(`Error fetching data for: ${error.message}`);
+          });
+      },
+      deleteContact: (id) => {
+        fetch(baseUrl + id, {
+          method: "DELETE",
+        }).then((response) => response.json());
+      },
+      getUpdateContact: (upDateData) => {
+        setStore({ upDateContactInfo: upDateData });
+      },
+      upOrDelete: (method) => {
+        setStore({ upOrDelete: method });
+      },
+      upDateContactInfo: (name, email, address, phone, id) => {
+        fetch(baseUrl + id, {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            full_name: name,
+            email: email,
+            agenda_slug: "Kbalves-agenda",
+            address: address,
+            phone: phone,
+          }),
+        });
+      },
+    },
+  };
 };
 
 export default getState;
